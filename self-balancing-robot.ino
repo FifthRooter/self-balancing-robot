@@ -4,27 +4,28 @@
 #include "math.h"
 
 
-MPU6050 mpu;
+MPU6050 mpu;                                    // Create an instance of the MPU6050 class
 
-int16_t accY, accZ;
-float accAngle;
+int16_t accY, accZ;                             // Define accelerometer Y and Z values as 16bit integers
+float accAngle;                                 // Define the angle that will be calculated using accY and accZ values
 
-int16_t gyroX;
-float gyroAngle=0;
-unsigned long currTime, prevTime = 0, loopTime;
+int16_t gyroX;                                  // Define gyroscope X value (angular velocity around x-axis) as 16bit integer
+float gyroAngle=0;                              // Give the gyro angle an initial value of 0
+unsigned long currTime, prevTime = 0, loopTime; // Set time-related variables as 32bit numbers of only positive value (0 to 2^32-1)
 
-#define direction_left 5
-#define direction_right 8
-#define motor_pwm_left 6
-#define motor_pwm_right 11
+#define direction_left 5                        // Set pin number for DIR pin of left motor
+#define direction_right 8                       // Set pin number for DIR pin of right motor
+#define motor_pwm_left 6                        // Set pin number for EN pin of left motor (must be a PWM pin)
+#define motor_pwm_right 11                      // Set pin number for EN pin of right motor (must be a PWM pin)
 
-#define Kp 26 
-#define Kd 0 //0.003
-#define Ki 0 //0.5
+#define Kp 28                                   // Set the proportional gain value for the PID controller
+#define Kd 0                                    //0.003 // Set the derivative gain value for the PID controller
+#define Ki 0.5                                  //0.5 // Set the integral gain value for the PID controller
 
-#define sampleTime 0.005
-#define targetAngle -10
+#define sampleTime 0.005                        // Define sampling time
+#define targetAngle -14                         // Define target angle which is the desired tilt of the robot
 
+// Declare variables that are shared between the interrupt function and main loop as volatile to avoid compiler attempt to optimize the shared objects
 volatile int motorPower, gyroRate;
 volatile float currentAngle, prevAngle=0, error, prevError=0, errorSum=0;
 
