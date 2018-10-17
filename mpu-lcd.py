@@ -173,8 +173,8 @@ def readMPU(addr):
     low = bus.read_byte_data(Device_Address, addr+1)
     value = ((high << 8) | low)
     if(value > 32768):
-    value = value - 65536
-    return value
+        value = value - 65536
+        return value
 
 
 def accel():
