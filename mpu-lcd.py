@@ -137,12 +137,12 @@ def setCursor(x,y):
 
 
 def InitMPU():
-bus.write_byte_data(Device_Address, DIV, 7)
-bus.write_byte_data(Device_Address, PWR_M, 1)
-bus.write_byte_data(Device_Address, CONFIG, 0)
-bus.write_byte_data(Device_Address, GYRO_CONFIG, 24)
-bus.write_byte_data(Device_Address, INT_EN, 1)
-time.sleep(1)
+    bus.write_byte_data(Device_Address, DIV, 7)
+    bus.write_byte_data(Device_Address, PWR_M, 1)
+    bus.write_byte_data(Device_Address, CONFIG, 0)
+    bus.write_byte_data(Device_Address, GYRO_CONFIG, 24)
+    bus.write_byte_data(Device_Address, INT_EN, 1)
+    time.sleep(1)
 
 def display(x,y,z):
       x=x*100
@@ -169,24 +169,26 @@ def display(x,y,z):
 
 
 def readMPU(addr):
-high = bus.read_byte_data(Device_Address, addr)
-low = bus.read_byte_data(Device_Address, addr+1)
-value = ((high << 8) | low)
-if(value > 32768):
-value = value - 65536
-return value
+    high = bus.read_byte_data(Device_Address, addr)
+    low = bus.read_byte_data(Device_Address, addr+1)
+    value = ((high << 8) | low)
+    if(value > 32768):
+    value = value - 65536
+    return value
+
+
 def accel():
-x = readMPU(ACCEL_X)
-y = readMPU(ACCEL_Y)
-z = readMPU(ACCEL_Z)
+    x = readMPU(ACCEL_X)
+    y = readMPU(ACCEL_Y)
+    z = readMPU(ACCEL_Z)
 
-Ax = (x/16384.0-AxCal)
-Ay = (y/16384.0-AyCal)
-Az = (z/16384.0-AzCal)
+    Ax = (x/16384.0-AxCal)
+    Ay = (y/16384.0-AyCal)
+    Az = (z/16384.0-AzCal)
 
-#print "X="+str(Ax)
-display(Ax,Ay,Az)
-time.sleep(.01)
+    #print "X="+str(Ax)
+    display(Ax,Ay,Az)
+    time.sleep(.01)
 
 def gyro():
       global GxCal
@@ -265,6 +267,8 @@ Print("Circuit Digest")
 time.sleep(2)
 InitMPU()
 calibrate()
+
+
 while 1:
   InitMPU()
   clear()
