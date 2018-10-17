@@ -1,0 +1,19 @@
+{
+  "name": "self-balancing-robot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FifthRooter/self-balancing-robot.git"
+  },
+  "author": "Arbestor Dinggleback",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/FifthRooter/self-balancing-robot/issues"
+  },
+  "homepage": "https://github.com/FifthRooter/self-balancing-robot#readme"
+}
