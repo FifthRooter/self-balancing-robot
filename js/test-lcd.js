@@ -1,6 +1,6 @@
 const Lcd = require('lcd')
 
-const lcd = new Lcd({rs: 45, e: 44, data: [66, 67, 68, 69], cols: 8, rows: 1})
+const lcd = new Lcd({rs: 18, e: 23, data: [24, 25, 8, 7], cols: 8, rows: 1})
 
 lcd.on('ready', () => {
   setInterval(() => {
