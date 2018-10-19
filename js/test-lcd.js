@@ -1,4 +1,4 @@
-const lcd = require('lcd')
+const Lcd = require('lcd')
 
 const lcd = new Lcd({rs: 45, e: 44, data: [66, 67, 68, 69], cols: 8, rows: 1})
 
