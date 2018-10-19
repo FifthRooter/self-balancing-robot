@@ -5,7 +5,7 @@ const timer = require('nanotimer')
 const gpio = require('pigpio')
 const lcd = require('lcd')
 
-const lcd = new Lcd({rs: 45, e: 44, data: [66, 67, 68, 69], cols: 8, rows: 1})
+const lcd = new Lcd({rs: 18, e: 23, data: [24, 25, 8, 7], cols: 8, rows: 1})
 
 let address = 0x68
 let i2c1 = i2c.openSync(1)
