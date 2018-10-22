@@ -72,7 +72,8 @@ timer.setInterval(() => {
 
   motorPower = Kp*(error) + Ki*(errorSum)*sampleTime - Kd*(currentAngle-prevAngle)/sampleTime
   motorPower = motorPower > 255 ? 255 : motorPower < -255 ? -255 : motorPower
-
+  setMotors(motorPower, motorPower)
+  
   prevAngle = currentAngle
 
 
