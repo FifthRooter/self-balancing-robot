@@ -12,7 +12,7 @@ let address = 0x68
 let i2c1 = i2c.openSync(1)
 const sensor = new MPU6050(i2c1, address)
 
-let accY, accY, gyroX, gyroRate, currTime, loopTime, prevTime=0, gyroAngle=0
+let accX, accY, gyroX, gyroRate, currTime, loopTime, prevTime=0, gyroAngle=0
 let motorPower, currentAngle, prevAngle=0, error, prevError=0, errorSum=0
 
 let Kp=15, Kd=0.03, Ki=5
