@@ -5,6 +5,31 @@ const nanotimer = require('nanotimer')
 const gpio = require('pigpio').Gpio
 const lcd = require('lcd')
 
+const app = require('express')()
+const server = require('http').createServer(app)
+const io = require('socket.io')(server)
+
+app.use(express.static(__dirname + '../node_modules'))
+app.get('/', (req, res) => {
+  res.sendFile(__dirname + '../index.html')
+})
+
+server.listen(4200)
+
+
+io.on('connection', (socket) => {
+  console.log('New user connected')
+  socket.emit('ping', { hello: 'world'})
+
+  socket.on('disconnect', () => {
+    console.log('User disconnected')
+  })
+
+  socket.on('motorState', (motorState) => {
+    motorsTurnedOff = motorState
+    console.log('Motor state: ' + motorState)
+  })
+})
 //const lcd = new Lcd({rs: 18, e: 23, data: [24, 25, 8, 7], cols: 16, rows: 2})
 const timer = new nanotimer()
 
@@ -14,6 +39,8 @@ const sensor = new MPU6050(i2c1, address)
 
 let accX, accY, gyroX, gyroRate, currTime, loopTime, prevTime=0, gyroAngle=0
 let motorPower, currentAngle, prevAngle=0, error, prevError=0, errorSum=0
+
+let motorsTurnedOff = false
 
 let Kp=15, Kd=0.03, Ki=5
 
@@ -27,32 +54,42 @@ const motor_pwm_left = new gpio(20, {mode: gpio.OUTPUT})
 const motor_pwm_right = new gpio(21, {mode: gpio.OUTPUT})
 
 
+let motorState = (motorsAreOn) => {
+  motorsTurnedOff = motorsAreOn
+}
+
 let mapRange = (x, in_min, in_max, out_min, out_max) => {
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
 }
 
 let setMotors = (leftMotorSpeed, rightMotorSpeed) => {
-  if (leftMotorSpeed <= 0) {
-    leftMotorSpeed = leftMotorSpeed * (-1)
-    leftMotorSpeed = mapRange(leftMotorSpeed, 0, 255, 10, 255)
-    direction_left.digitalWrite(1)
-    motor_pwm_left.pwmWrite(parseInt(leftMotorSpeed, 10))
+  if (motorsTurnedOff) {
+    if (leftMotorSpeed <= 0) {
+      leftMotorSpeed = leftMotorSpeed * (-1)
+      leftMotorSpeed = mapRange(leftMotorSpeed, 0, 255, 10, 255)
+      direction_left.digitalWrite(1)
+      motor_pwm_left.pwmWrite(parseInt(leftMotorSpeed, 10))
+    } else {
+      leftMotorSpeed = mapRange(leftMotorSpeed, 0, 255, 20, 255)
+      direction_left.digitalWrite(0)
+      motor_pwm_left.pwmWrite(parseInt(leftMotorSpeed, 10))
+    }
+
+    if (rightMotorSpeed <= 0) {
+      rightMotorSpeed = rightMotorSpeed * (-1)
+      rightMotorSpeed = mapRange(rightMotorSpeed, 0, 255, 0, 255)
+      direction_right.digitalWrite(0)
+      motor_pwm_right.pwmWrite(parseInt(rightMotorSpeed, 10))
+    } else {
+      rightMotorSpeed = mapRange(rightMotorSpeed, 0, 255, 0, 255)
+      direction_right.digitalWrite(1)
+      motor_pwm_right.pwmWrite(parseInt(rightMotorSpeed, 10))
+    }
   } else {
-    leftMotorSpeed = mapRange(leftMotorSpeed, 0, 255, 20, 255)
-    direction_left.digitalWrite(0)
-    motor_pwm_left.pwmWrite(parseInt(leftMotorSpeed, 10))
+    motor_pwm_left.pwmWrite(0)
+    motor_pwm_right.pwmWrite(0)
   }
 
-  if (rightMotorSpeed <= 0) {
-    rightMotorSpeed = rightMotorSpeed * (-1)
-    rightMotorSpeed = mapRange(rightMotorSpeed, 0, 255, 0, 255)
-    direction_right.digitalWrite(0)
-    motor_pwm_right.pwmWrite(parseInt(rightMotorSpeed, 10))
-  } else {
-    rightMotorSpeed = mapRange(rightMotorSpeed, 0, 255, 0, 255)
-    direction_right.digitalWrite(1)
-    motor_pwm_right.pwmWrite(parseInt(rightMotorSpeed, 10))
-  }
 }
 
 

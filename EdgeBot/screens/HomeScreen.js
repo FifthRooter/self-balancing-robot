@@ -11,7 +11,7 @@ import {
 import { WebBrowser } from 'expo';
 import { Button, Provider as PaperProvider } from 'react-native-paper'
 import { MonoText } from '../components/StyledText';
-const socket = require('socket.io-client')('http://localhost:3000')
+const socket = require('socket.io-client')('http://localhost:4200')
 
 
 
