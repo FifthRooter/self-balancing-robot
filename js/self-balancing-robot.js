@@ -17,7 +17,7 @@ let motorPower, currentAngle, prevAngle=0, error, prevError=0, errorSum=0
 
 let Kp=15, Kd=0.03, Ki=5
 
-let sampleTime = 5
+let sampleTime = 0.005
 let targetAngle = -14
 
 const direction_left = new gpio(16, {mode: gpio.OUTPUT})
@@ -73,7 +73,7 @@ timer.setInterval(() => {
   motorPower = Kp*(error) + Ki*(errorSum)*sampleTime - Kd*(currentAngle-prevAngle)/sampleTime
   motorPower = motorPower > 255 ? 255 : motorPower < -255 ? -255 : motorPower
   setMotors(motorPower, motorPower)
-  
+
   prevAngle = currentAngle
 
 
