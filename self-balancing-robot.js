@@ -9,13 +9,11 @@ const app = require('express')()
 const server = require('http').createServer(app)
 const io = require('socket.io')(server)
 
-app.use(express.static(__dirname + '../node_modules'))
+server.listen(80)
+
 app.get('/', (req, res) => {
-  res.sendFile(__dirname + '../index.html')
+  res.sendFile(__dirname + './index.html')
 })
-
-server.listen(4200)
-
 
 io.on('connection', (socket) => {
   console.log('New user connected')
