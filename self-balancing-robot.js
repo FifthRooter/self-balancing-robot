@@ -12,22 +12,9 @@ const io = require('socket.io')(server)
 server.listen(80)
 
 app.get('/', (req, res) => {
-  res.sendFile(__dirname + './index.html')
+  res.sendFile(__dirname + 'index.html')
 })
 
-io.on('connection', (socket) => {
-  console.log('New user connected')
-  socket.emit('ping', { hello: 'world'})
-
-  socket.on('disconnect', () => {
-    console.log('User disconnected')
-  })
-
-  socket.on('motorState', (motorState) => {
-    motorsTurnedOff = motorState
-    console.log('Motor state: ' + motorState)
-  })
-})
 //const lcd = new Lcd({rs: 18, e: 23, data: [24, 25, 8, 7], cols: 16, rows: 2})
 const timer = new nanotimer()
 
@@ -143,3 +130,19 @@ process.on('SIGINT', () => {
   motor_pwm_right.pwmWrite(0)
   process.exit()
 });
+
+io.on('connection', (socket) => {
+  console.log('New user connected')
+  socket.emit('ping', { hello: 'world'})
+
+  socket.on('disconnect', () => {
+    console.log('User disconnected')
+  })
+
+  socket.on('motorState', (motorState) => {
+    motorsTurnedOff = motorState
+    console.log('Motor state: ' + motorState)
+  })
+
+
+})
