@@ -36,22 +36,22 @@ let setMotors = (leftMotorSpeed, rightMotorSpeed) => {
     leftMotorSpeed = leftMotorSpeed * (-1)
     leftMotorSpeed = mapRange(leftMotorSpeed, 0, 255, 10, 255)
     direction_left.digitalWrite(0)
-    motor_pwm_left.pwmWrite(leftMotorSpeed)
+    motor_pwm_left.pwmWrite(parseInt(leftMotorSpeed, 10))
   } else {
     leftMotorSpeed = mapRange(leftMotorSpeed, 0, 255, 20, 255)
     direction_left.digitalWrite(1)
-    motor_pwm_left.pwmWrite(leftMotorSpeed)
+    motor_pwm_left.pwmWrite(parseInt(leftMotorSpeed, 10))
   }
 
   if (rightMotorSpeed <= 0) {
     rightMotorSpeed = rightMotorSpeed * (-1)
     rightMotorSpeed = mapRange(rightMotorSpeed, 0, 255, 0, 255)
     direction_right.digitalWrite(1)
-    motor_pwm_right.pwmWrite(rightMotorSpeed)
+    motor_pwm_right.pwmWrite(parseInt(rightMotorSpeed, 10))
   } else {
     rightMotorSpeed = mapRange(rightMotorSpeed, 0, 255, 0, 255)
     direction_right.digitalWrite(0)
-    motor_pwm_right.pwmWrite(rightMotorSpeed)
+    motor_pwm_right.pwmWrite(parseInt(rightMotorSpeed, 10))
   }
 }
 
@@ -72,7 +72,10 @@ timer.setInterval(() => {
   errorSum = errorSum + error
 
   motorPower = Kp*(error) + Ki*(errorSum)*sampleTime - Kd*(currentAngle-prevAngle)/sampleTime
-  motorPower = motorPower > 255 ? 255 : motorPower < -255 ? -255 : parseInt(motorPower, 10)
+  //motorPower = motorPower > 255 ? 255 : motorPower < -255 ? -255 : parseInt(motorPower, 10)
+  if (motorPower > 255) motorPower = 255
+  else if (motorPower < -255) motorPower = -255
+
   setMotors(motorPower, motorPower)
 
   prevAngle = currentAngle
