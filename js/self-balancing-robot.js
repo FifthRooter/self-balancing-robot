@@ -68,7 +68,7 @@ timer.setInterval(() => {
 
   currentAngle = 0.99 * (prevAngle + gyroAngle) + 0.01 * accAngle
 
-  error = currentAngle = targetAngle
+  error = currentAngle - targetAngle
   errorSum = errorSum + error
 
   motorPower = Kp*(error) + Ki*(errorSum)*sampleTime - Kd*(currentAngle-prevAngle)/sampleTime
