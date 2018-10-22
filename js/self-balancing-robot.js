@@ -18,7 +18,7 @@ let motorPower, currentAngle, prevAngle=0, error, prevError=0, errorSum=0
 let Kp=15, Kd=0.03, Ki=5
 
 let sampleTime = 0.005
-let targetAngle = -14
+let targetAngle = 0
 
 const direction_left = new gpio(16, {mode: gpio.OUTPUT})
 const direction_right = new gpio(12, {mode: gpio.OUTPUT})
@@ -35,22 +35,22 @@ let setMotors = (leftMotorSpeed, rightMotorSpeed) => {
   if (leftMotorSpeed <= 0) {
     leftMotorSpeed = leftMotorSpeed * (-1)
     leftMotorSpeed = mapRange(leftMotorSpeed, 0, 255, 10, 255)
-    direction_left.digitalWrite(0)
+    direction_left.digitalWrite(1)
     motor_pwm_left.pwmWrite(parseInt(leftMotorSpeed, 10))
   } else {
     leftMotorSpeed = mapRange(leftMotorSpeed, 0, 255, 20, 255)
-    direction_left.digitalWrite(1)
+    direction_left.digitalWrite(0)
     motor_pwm_left.pwmWrite(parseInt(leftMotorSpeed, 10))
   }
 
   if (rightMotorSpeed <= 0) {
     rightMotorSpeed = rightMotorSpeed * (-1)
     rightMotorSpeed = mapRange(rightMotorSpeed, 0, 255, 0, 255)
-    direction_right.digitalWrite(1)
+    direction_right.digitalWrite(0)
     motor_pwm_right.pwmWrite(parseInt(rightMotorSpeed, 10))
   } else {
     rightMotorSpeed = mapRange(rightMotorSpeed, 0, 255, 0, 255)
-    direction_right.digitalWrite(0)
+    direction_right.digitalWrite(1)
     motor_pwm_right.pwmWrite(parseInt(rightMotorSpeed, 10))
   }
 }
