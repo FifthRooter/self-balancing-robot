@@ -1,11 +1,12 @@
 const i2c = require('i2c-bus')
 const MPU6050 = require('i2c-mpu6050')
 const math = require('mathjs')
-const timer = require('nanotimer')
+const nanotimer = require('nanotimer')
 const gpio = require('pigpio').Gpio
 const lcd = require('lcd')
 
-const lcd = new Lcd({rs: 18, e: 23, data: [24, 25, 8, 7], cols: 16, rows: 2})
+//const lcd = new Lcd({rs: 18, e: 23, data: [24, 25, 8, 7], cols: 16, rows: 2})
+const timer = new nanotimer()
 
 let address = 0x68
 let i2c1 = i2c.openSync(1)
@@ -31,28 +32,74 @@ let mapRange = (x, in_min, in_max, out_min, out_max) => {
 }
 
 let setMotors = (leftMotorSpeed, rightMotorSpeed) => {
-  if (leftMotorSpeed >= 0) {
-    leftMotorSpeed = 
+  if (leftMotorSpeed <= 0) {
+    leftMotorSpeed = leftMotorSpeed * (-1)
+    leftMotorSpeed = mapRange(leftMotorSpeed, 0, 255, 10, 255)
+    direction_left.digitalWrite(0)
+    motor_pwm_left.pwmWrite(leftMotorSpeed)
+  } else {
+    leftMotorSpeed = mapRange(leftMotorSpeed, 0, 255, 20, 255)
+    direction_left.digitalWrite(1)
+  }
+
+  if (rightMotorSpeed <= 0) {
+    rightMotorSpeed = rightMotorSpeed * (-1)
+    rightMotorSpeed = mapRange(rightMotorSpeed, 0, 255, 0, 255)
+    direction_right.digitalWrite(1)
+    motor_pwm_right.pwmWrite(rightMotorSpeed)
+  } else {
+    rightMotorSpeed = mapRange(rightMotorSpeed, 0, 255, 0, 255)
+    direction_right.digitalWrite(0)
+    motor_pwm_right.pwmWrite(rightMotorSpeed)
   }
 }
 
 
-setInterval(() => {
+timer.setInterval(() => {
   let data = sensor.readSync()
-  lcd.on('ready', () => {
-    lcd.setCursor(0, 0)
-    lcd.print("Temp: " + data.temp, (err) => {
-      if (err) {
-        throw err
-      }
-    })
-  })
-}, 120)
+  accY = data.accel.y
+  accZ = data.accel.z
+  gyroX = data.gyro.x
+
+  accAngle = atan2(accY, accZ) * 180 / Math.PI
+  gyroRate = gyroX
+  gyroAngle = gyroRate * sampleTime
+
+  currentAngle = 0.99 * (prevAngle + gyroAngle) + 0.01 * accAngle
+
+  error = currentAngle = targetAngle
+  errorSum = errorSum + error
+
+  motorPower = Kp*(error) + Ki*(errorSum)*sampleTime - Kd*(currentAngle-prevAngle)/sampleTime
+  motorPower = motorPower > 255 ? 255 : motorPower < -255 ? -255 : motorPower
+
+  prevAngle = currentAngle
 
 
+},[""], '5m', (err) => {
+  if (err) {
+    console.log('Something went wrong with timer initialization :(')
+  }
+})
 
-// If ctrl+c is hit, free resources and exit.
+
+// setInterval(() => {
+//   let data = sensor.readSync()
+//   lcd.on('ready', () => {
+//     lcd.setCursor(0, 0)
+//     lcd.print("Temp: " + data.temp, (err) => {
+//       if (err) {
+//         throw err
+//       }
+//     })
+//   })
+// }, 120)
+
+
 process.on('SIGINT', () => {
   lcd.close();
-  process.exit();
+  timer.clearInterval()
+  motor_pwm_left.pwmWrite(0)
+  motor_pwm_right.pwmWrite(0)
+  process.exit()
 });
