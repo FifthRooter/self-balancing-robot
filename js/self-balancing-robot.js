@@ -61,7 +61,7 @@ timer.setInterval(() => {
   accZ = data.accel.z
   gyroX = data.gyro.x
 
-  accAngle = atan2(accY, accZ) * 180 / Math.PI
+  accAngle = math.atan2(accY, accZ) * 180 / Math.PI
   gyroRate = gyroX
   gyroAngle = gyroRate * sampleTime
 
@@ -97,7 +97,7 @@ timer.setInterval(() => {
 
 
 process.on('SIGINT', () => {
-  lcd.close();
+  //lcd.close();
   timer.clearInterval()
   motor_pwm_left.pwmWrite(0)
   motor_pwm_right.pwmWrite(0)
