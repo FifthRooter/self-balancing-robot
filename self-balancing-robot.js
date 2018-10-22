@@ -11,9 +11,6 @@ const io = require('socket.io')(server)
 
 server.listen(80)
 
-app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/index.html')
-})
 
 //const lcd = new Lcd({rs: 18, e: 23, data: [24, 25, 8, 7], cols: 16, rows: 2})
 const timer = new nanotimer()
