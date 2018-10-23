@@ -11,12 +11,12 @@ import {
 import { WebBrowser } from 'expo';
 import { Button, Provider as PaperProvider } from 'react-native-paper'
 import { MonoText } from '../components/StyledText';
-let socket = require('socket.io-client')('https://fast-cove-40618.herokuapp.com')
-
-let toggleMotors = (isOn) => {
-  socket.emit('motorState', (!isOn))
-  robot.motorState = !isOn
-}
+import {subscribeToTimer } from '../api.js'
+//
+// let toggleMotors = (isOn) => {
+//   socket.emit('motorState', (!isOn))
+//   robot.motorState = !isOn
+// }
 
 export default class HomeScreen extends React.Component {
   static navigationOptions = {
@@ -24,6 +24,7 @@ export default class HomeScreen extends React.Component {
   };
 
   state = {
+    timestamp: 'no timestamp yet',
     isConnected: false,
     data: null
   }
@@ -37,21 +38,28 @@ export default class HomeScreen extends React.Component {
     }
   }
 
+  constructor(props) {
+    super(props)
+
+    subscribeToTimer((err, timestamp) => this.setState({
+      timestamp
+    }))
+  }
 
 
   componentDidMount() {
 
     //socket.emit("getSomeData",{data: "some random data"});
 
-    socket.on('connect', () => {
-      this.setState({ isConnected: true });
-      console.log('connected to server')
-
-    });
-
-    socket.emit('motorState', () => {
-      console.log('Woops')
-    })
+    // socket.on('connect', () => {
+    //   this.setState({ isConnected: true });
+    //   console.log('connected to server')
+    //
+    // });
+    //
+    // socket.emit('motorState', () => {
+    //   console.log('Woops')
+    // })
  }
 
 
@@ -84,7 +92,7 @@ export default class HomeScreen extends React.Component {
                 Connected: {this.state.isConnected ? 'true' : 'false'}
               </Text>
               <Text>
-                Robot is on: {this.state.robotIsOn ? 'Yes' : 'No'}
+                This is the timer value: {this.state.timestamp}
               </Text>
               <Button icon='ac-unit' mode='outlined' onClick={() => this.toggleMotors(true)}>Motor</Button>
 

@@ -70,37 +70,6 @@ let setMotors = (leftMotorSpeed, rightMotorSpeed) => {
 
 }
 
-timer.setInterval(() => {
-  let data = sensor.readSync()
-  accY = data.accel.y
-  accZ = data.accel.z
-  gyroX = data.gyro.x
-
-  accAngle = math.atan2(accY, accZ) * 180 / Math.PI
-  gyroRate = gyroX
-  gyroAngle = gyroRate * sampleTime
-
-  currentAngle = 0.99 * (prevAngle + gyroAngle) + 0.01 * accAngle
-
-  error = currentAngle - targetAngle
-  errorSum = errorSum + error
-
-  motorPower = Kp*(error) + Ki*(errorSum)*sampleTime - Kd*(currentAngle-prevAngle)/sampleTime
-  //motorPower = motorPower > 255 ? 255 : motorPower < -255 ? -255 : parseInt(motorPower, 10)
-  if (motorPower > 255) motorPower = 255
-  else if (motorPower < -255) motorPower = -255
-
-  setMotors(motorPower, motorPower)
-
-  prevAngle = currentAngle
-
-
-},[""], '5m', (err) => {
-  if (err) {
-    console.log('Something went wrong with timer initialization :(')
-  }
-})
-
 
 // setInterval(() => {
 //   let data = sensor.readSync()
@@ -123,8 +92,7 @@ process.on('SIGINT', () => {
   process.exit()
 });
 
-io.listen(8000)
-console.log('listening on port ', port)
+
 
 io.on('connection', (socket) => {
   console.log('New user connected')
@@ -141,5 +109,38 @@ io.on('connection', (socket) => {
     console.log('Motor state: ' + motorState)
   })
 
+  timer.setInterval(() => {
+    let data = sensor.readSync()
+    accY = data.accel.y
+    accZ = data.accel.z
+    gyroX = data.gyro.x
 
+    accAngle = math.atan2(accY, accZ) * 180 / Math.PI
+    gyroRate = gyroX
+    gyroAngle = gyroRate * sampleTime
+
+    currentAngle = 0.99 * (prevAngle + gyroAngle) + 0.01 * accAngle
+
+    error = currentAngle - targetAngle
+    errorSum = errorSum + error
+
+    motorPower = Kp*(error) + Ki*(errorSum)*sampleTime - Kd*(currentAngle-prevAngle)/sampleTime
+    //motorPower = motorPower > 255 ? 255 : motorPower < -255 ? -255 : parseInt(motorPower, 10)
+    if (motorPower > 255) motorPower = 255
+    else if (motorPower < -255) motorPower = -255
+
+    setMotors(motorPower, motorPower)
+
+    prevAngle = currentAngle
+
+
+  },[""], '5m', (err) => {
+    if (err) {
+      console.log('Something went wrong with timer initialization :(')
+    }
+  })
 })
+
+const port = 8000
+io.listen(port)
+console.log('listening on port ', port)
