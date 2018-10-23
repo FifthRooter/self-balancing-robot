@@ -11,9 +11,12 @@ import {
 import { WebBrowser } from 'expo';
 import { Button, Provider as PaperProvider } from 'react-native-paper'
 import { MonoText } from '../components/StyledText';
-const socket = require('socket.io-client')('http://192.168.178.39:4200')
+let socket = require('socket.io-client')('https://fast-cove-40618.herokuapp.com')
 
-
+let toggleMotors = (isOn) => {
+  socket.emit('motorState', (!isOn))
+  robot.motorState = !isOn
+}
 
 export default class HomeScreen extends React.Component {
   static navigationOptions = {
@@ -26,29 +29,30 @@ export default class HomeScreen extends React.Component {
   }
 
   robot = {
-    motorState: false,
+    motorState: true,
     gains: {
       Kp: 18,
       Kd: 0.03,
-      Ki: 5
+      Ki: 4
     }
   }
 
-  let toggleMotors = (isOn) => {
-    socket.emit('motorState', (!isOn))
-    this.setState({ robot.motorState: !isOn})
-  }
+
 
   componentDidMount() {
 
+    //socket.emit("getSomeData",{data: "some random data"});
+
     socket.on('connect', () => {
       this.setState({ isConnected: true });
+      console.log('connected to server')
+
     });
 
-    socket.on('motorState', () => {
-      this.setState({ robot.motorState: })
+    socket.emit('motorState', () => {
+      console.log('Woops')
     })
-  }
+ }
 
 
   render() {
@@ -82,8 +86,7 @@ export default class HomeScreen extends React.Component {
               <Text>
                 Robot is on: {this.state.robotIsOn ? 'Yes' : 'No'}
               </Text>
-              <br/>
-              <Button icon='default' mode='outlined' onClick={() => this.toggleMotors(this.robot.motorState)}>Motor</Button>
+              <Button icon='ac-unit' mode='outlined' onClick={() => this.toggleMotors(true)}>Motor</Button>
 
             </View>
 

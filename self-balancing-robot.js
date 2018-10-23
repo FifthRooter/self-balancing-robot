@@ -5,11 +5,7 @@ const nanotimer = require('nanotimer')
 const gpio = require('pigpio').Gpio
 const lcd = require('lcd')
 
-const app = require('express')()
-const server = require('http').createServer(app)
-const io = require('socket.io')(server)
-
-server.listen(80)
+const io = require('socket.io')()
 
 
 //const lcd = new Lcd({rs: 18, e: 23, data: [24, 25, 8, 7], cols: 16, rows: 2})
@@ -127,10 +123,14 @@ process.on('SIGINT', () => {
   process.exit()
 });
 
+io.listen(8000)
+console.log('listening on port ', port)
 
 io.on('connection', (socket) => {
   console.log('New user connected')
-  socket.emit('ping', { hello: 'world'})
+  setInterval(() => {
+    socket.emit('ping', { hello: 'world'})
+  }, 5000)
 
   socket.on('disconnect', () => {
     console.log('User disconnected')
