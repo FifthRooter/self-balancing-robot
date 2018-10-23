@@ -5,10 +5,15 @@ const nanotimer = require('nanotimer')
 const gpio = require('pigpio').Gpio
 const lcd = require('lcd')
 
-const openSocket = require('socket.io')()
+const openSocket = require('socket.io-client')
 const socket = openSocket('http://192.168.178.10:8000')
 
 //const lcd = new Lcd({rs: 18, e: 23, data: [24, 25, 8, 7], cols: 16, rows: 2})
+
+socket.on('toggleMotors', () => {
+  console.log('motors toggled')
+})
+
 const timer = new nanotimer()
 
 let address = 0x68
@@ -125,7 +130,3 @@ process.on('SIGINT', () => {
   motor_pwm_right.pwmWrite(0)
   process.exit()
 });
-
-socket.on('toggleMotors', () => {
-  console.log('motors toggled')
-})
