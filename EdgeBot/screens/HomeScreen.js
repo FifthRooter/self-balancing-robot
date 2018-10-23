@@ -46,7 +46,6 @@ export default class HomeScreen extends React.Component {
     }))
   }
 
-
   componentDidMount() {
 
     //socket.emit("getSomeData",{data: "some random data"});

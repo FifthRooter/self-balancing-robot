@@ -5,8 +5,8 @@ const nanotimer = require('nanotimer')
 const gpio = require('pigpio').Gpio
 const lcd = require('lcd')
 
-const io = require('socket.io')()
-
+const openSocket = require('socket.io')()
+const socket = openSocket('http://192.168.178.10:8000')
 
 //const lcd = new Lcd({rs: 18, e: 23, data: [24, 25, 8, 7], cols: 16, rows: 2})
 const timer = new nanotimer()
@@ -84,37 +84,7 @@ let setMotors = (leftMotorSpeed, rightMotorSpeed) => {
 // }, 120)
 
 
-process.on('SIGINT', () => {
-  //lcd.close();
-  timer.clearInterval()
-  motor_pwm_left.pwmWrite(0)
-  motor_pwm_right.pwmWrite(0)
-  process.exit()
-});
 
-
-
-io.on('connection', (socket) => {
-  console.log('New user connected')
-  setInterval(() => {
-    socket.emit('ping', { hello: 'world'})
-  }, 5000)
-
-  socket.on('disconnect', () => {
-    console.log('User disconnected')
-  })
-
-  socket.on('motorState', (motorState) => {
-    motorsTurnedOff = motorState
-    console.log('Motor state: ' + motorState)
-  })
-
-
-})
-
-const port = 8000
-io.listen(port)
-console.log('listening on port ', port)
 
 timer.setInterval(() => {
   let data = sensor.readSync()
@@ -145,4 +115,17 @@ timer.setInterval(() => {
   if (err) {
     console.log('Something went wrong with timer initialization :(')
   }
+})
+
+
+process.on('SIGINT', () => {
+  //lcd.close();
+  timer.clearInterval()
+  motor_pwm_left.pwmWrite(0)
+  motor_pwm_right.pwmWrite(0)
+  process.exit()
+});
+
+socket.on('toggleMotors', () => {
+  console.log('motors toggled')
 })
