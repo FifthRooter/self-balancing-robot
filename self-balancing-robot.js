@@ -5,14 +5,16 @@ const nanotimer = require('nanotimer')
 const gpio = require('pigpio').Gpio
 const lcd = require('lcd')
 
-const openSocket = require('socket.io-client')
-const socket = openSocket('http://192.168.178.10:8000')
+const io = require('socket.io')()
+
+// const openSocket = require('socket.io-client')
+// const socket = openSocket('http://192.168.178.10:8000')
 
 //const lcd = new Lcd({rs: 18, e: 23, data: [24, 25, 8, 7], cols: 16, rows: 2})
 
-socket.on('toggleMotors', () => {
-  console.log('motors toggled')
-})
+// socket.on('toggleMotors', () => {
+//   console.log('motors toggled')
+// })
 
 const timer = new nanotimer()
 
@@ -89,38 +91,40 @@ let setMotors = (leftMotorSpeed, rightMotorSpeed) => {
 // }, 120)
 
 
+let startRobot = () => {
+  console.log('robot started')
+  timer.setInterval(() => {
+    let data = sensor.readSync()
+    accY = data.accel.y
+    accZ = data.accel.z
+    gyroX = data.gyro.x
+
+    accAngle = math.atan2(accY, accZ) * 180 / Math.PI
+    gyroRate = gyroX
+    gyroAngle = gyroRate * sampleTime
+
+    currentAngle = 0.99 * (prevAngle + gyroAngle) + 0.01 * accAngle
+
+    error = currentAngle - targetAngle
+    errorSum = errorSum + error
+
+    motorPower = Kp*(error) + Ki*(errorSum)*sampleTime - Kd*(currentAngle-prevAngle)/sampleTime
+    //motorPower = motorPower > 255 ? 255 : motorPower < -255 ? -255 : parseInt(motorPower, 10)
+    if (motorPower > 255) motorPower = 255
+    else if (motorPower < -255) motorPower = -255
+
+    setMotors(motorPower, motorPower)
+
+    prevAngle = currentAngle
 
 
-timer.setInterval(() => {
-  let data = sensor.readSync()
-  accY = data.accel.y
-  accZ = data.accel.z
-  gyroX = data.gyro.x
+  },[""], '5m', (err) => {
+    if (err) {
+      console.log('Something went wrong with timer initialization :(')
+    }
+  })
+}
 
-  accAngle = math.atan2(accY, accZ) * 180 / Math.PI
-  gyroRate = gyroX
-  gyroAngle = gyroRate * sampleTime
-
-  currentAngle = 0.99 * (prevAngle + gyroAngle) + 0.01 * accAngle
-
-  error = currentAngle - targetAngle
-  errorSum = errorSum + error
-
-  motorPower = Kp*(error) + Ki*(errorSum)*sampleTime - Kd*(currentAngle-prevAngle)/sampleTime
-  //motorPower = motorPower > 255 ? 255 : motorPower < -255 ? -255 : parseInt(motorPower, 10)
-  if (motorPower > 255) motorPower = 255
-  else if (motorPower < -255) motorPower = -255
-
-  setMotors(motorPower, motorPower)
-
-  prevAngle = currentAngle
-
-
-},[""], '5m', (err) => {
-  if (err) {
-    console.log('Something went wrong with timer initialization :(')
-  }
-})
 
 
 process.on('SIGINT', () => {
@@ -130,3 +134,9 @@ process.on('SIGINT', () => {
   motor_pwm_right.pwmWrite(0)
   process.exit()
 });
+
+
+io.on('connection', (socket) => {
+  startRobot()
+  console.log('connection created, robot started')
+})

@@ -7,6 +7,15 @@ io.on('connection', (socket) => {
       socket.emit('timer', new Date())
     }, interval)
   })
+  socket.on('toggleMotors', (interval) => {
+      setInterval(() => {
+        io.emit('toggleMotors', {time: 'this oclock'})
+        console.log('motors toggled')
+      }, interval)
+  })
+  setInterval(() => {
+    console.log('doing stuff inside io.on')
+  })
 })
 
 

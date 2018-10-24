@@ -18,6 +18,8 @@ import {subscribeToTimer } from '../api.js'
 //   robot.motorState = !isOn
 // }
 
+
+
 export default class HomeScreen extends React.Component {
   static navigationOptions = {
     header: null,
@@ -32,12 +34,11 @@ export default class HomeScreen extends React.Component {
   robot = {
     motorState: true,
     gains: {
-      Kp: 18,
+      Kp: 14,
       Kd: 0.03,
       Ki: 4
     }
   }
-
 
   constructor(props) {
     super(props)
@@ -46,7 +47,6 @@ export default class HomeScreen extends React.Component {
       timestamp
     }))
   }
-
   componentDidMount() {
 
     //socket.emit("getSomeData",{data: "some random data"});
