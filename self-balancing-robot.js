@@ -140,3 +140,7 @@ io.on('connection', (socket) => {
   startRobot()
   console.log('connection created, robot started')
 })
+
+const port = 8000
+io.listen(port)
+console.log('listening on port 8000')
