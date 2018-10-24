@@ -7,16 +7,17 @@ import {
   Text,
   TouchableOpacity,
   View,
+  TextInput,
 } from 'react-native';
 import { WebBrowser } from 'expo';
 import { Button, Provider as PaperProvider } from 'react-native-paper'
 import { MonoText } from '../components/StyledText';
-import {subscribeToTimer } from '../api.js'
-//
-// let toggleMotors = (isOn) => {
-//   socket.emit('motorState', (!isOn))
-//   robot.motorState = !isOn
-// }
+//import {subscribeToTimer, updateGainz } from '../api.js'
+import ChangeText from '../ChangeText.js'
+import openSocket from 'socket.io-client';
+
+const socket = openSocket('http://192.168.178.39:8000');
+
 
 
 
@@ -24,29 +25,87 @@ export default class HomeScreen extends React.Component {
   static navigationOptions = {
     header: null,
   };
-
-  state = {
-    timestamp: 'no timestamp yet',
-    isConnected: false,
-    data: null
-  }
-
-  robot = {
-    motorState: true,
-    gains: {
-      Kp: 14,
-      Kd: 0.03,
-      Ki: 4
-    }
-  }
+  //
+  // state = {
+  //   timestamp: 'no timestamp yet',
+  //   isConnected: false,
+  //   data: null
+  // }
+  //
+  // robot = {
+  //   motorState: true,
+  //   gains: {
+  //     Kp: 14,
+  //     Kd: 0.03,
+  //     Ki: 4
+  //   }
+  // }
 
   constructor(props) {
     super(props)
-
-    subscribeToTimer((err, timestamp) => this.setState({
-      timestamp
-    }))
+    this.state = {
+      appText: 'Hallo',
+      timestamp: 'no timestamp',
+      isConnected: false,
+      data: null,
+      val: '2',
+      motorState: true,
+      robot: {
+        gains: {
+          Kp: 15,
+          Kd: 0.03,
+          Ki: 4,
+        }
+      }
+    }
   }
+
+  writeText = text => {
+    this.setState({
+        appText: text
+    })
+  }
+
+    // state = {
+    //   appText: 'Hallo',
+    //   timestamp: 'no timestamp',
+    //   isConnected: false,
+    //   data: null,
+    //   val: '2',
+    //   motorState: true,
+    //   robot: {
+    //     gains: {
+    //       Kp: 15,
+    //       Kd: 0.03,
+    //       Ki: 4,
+    //     }
+    //   }
+    // }
+
+
+
+
+    toggleMotors = () => {
+      socket.emit('toggleMotors')
+    }
+
+    submitKp = () => {
+      socket.emit('updateKp', this.state.robot.gains.Kp)
+    }
+
+    submitKd = () => {
+      socket.emit('updateKd', this.state.robot.gains.Kd)
+    }
+
+    submitKi = () => {
+      socket.emit('updateKi', this.state.robot.gains.Ki)
+    }
+
+    subscribeToTimer = (err, timestamp) => {this.setState({
+      timestamp
+    })}
+
+
   componentDidMount() {
 
     //socket.emit("getSomeData",{data: "some random data"});
@@ -61,7 +120,6 @@ export default class HomeScreen extends React.Component {
     //   console.log('Woops')
     // })
  }
-
 
   render() {
     return (
@@ -89,20 +147,61 @@ export default class HomeScreen extends React.Component {
               </View>
 
               <Text style={styles.getStartedText}>
-                Connected: {this.state.isConnected ? 'true' : 'false'}
+                Connected: {this.state.motorState ? 'true' : 'false'}
               </Text>
               <Text>
                 This is the timer value: {this.state.timestamp}
               </Text>
-              <Button icon='ac-unit' mode='outlined' onClick={() => this.toggleMotors(true)}>Motor</Button>
+              <Button icon='ac-unit' mode='outlined' onPress={this.toggleMotors}>Motor</Button>
 
             </View>
 
-            <View style={styles.helpContainer}>
-              <TouchableOpacity onPress={this._handleHelpPress} style={styles.helpLink}>
-                <Text style={styles.helpLinkText}>Help!</Text>
-              </TouchableOpacity>
+            <View style={{flex: 1, flexDirection: 'column', justifyContent: 'center'}}>
+              <View>
+                <View style={{flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>
+                  <Text style={styles.getStartedText}>Kp = {this.state.robot.gains.Kp}</Text>
+                  <TextInput
+                    style={{height:40, width:100, paddingHorizontal:20, marginVertical:10, marginHorizontal:15, borderColor: 'brown', borderWidth: 1}}
+                    onChangeText={(text) =>
+                      this.setState({robot: {gains: {Kp: text, Kd: this.state.robot.gains.Kd, Ki: this.state.robot.gains.Ki}}})}
+                    clearButtonMode='always'
+                   ></TextInput>
+                 <Button mode='outlined' onPress={this.submitKp}>Submit Kp</Button>
+                </View>
+              </View>
+
+              <View>
+                <View style={{flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>
+                  <Text style={styles.getStartedText}>Kd = {this.state.robot.gains.Kd}</Text>
+                  <TextInput
+                    style={{height:40, width:100, paddingHorizontal:20, marginVertical:10, marginHorizontal:15, borderColor: 'brown', borderWidth: 1}}
+                    onChangeText={(text) =>
+                      this.setState({robot: {gains: {Kp: this.state.robot.gains.Kp, Kd: text, Ki: this.state.robot.gains.Ki}}})}
+                    clearButtonMode='always'
+                   ></TextInput>
+                 <Button mode='outlined' onPress={this.submitKd}>Submit Kd</Button>
+                </View>
+              </View>
+              <View>
+                <View style={{flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>
+                  <Text style={styles.getStartedText}>Ki = {this.state.robot.gains.Ki}</Text>
+                  <TextInput
+                    style={{height:40, width:100, paddingHorizontal:20, marginVertical:10, marginHorizontal:15, borderColor: 'brown', borderWidth: 1}}
+                    onChangeText={(text) =>
+                      this.setState({robot: {gains: {Kp: this.state.robot.gains.Kp, Kd: this.state.robot.gains.Kd, Ki: text}}})}
+                    clearButtonMode='always'
+                   ></TextInput>
+                 <Button mode='outlined' onPress={this.submitKi}>Submit Ki</Button>
+                </View>
+              </View>
+              <View style={{flex: 1, flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
+                <Text style={styles.getStartedText}>{this.state.appText}</Text>
+                <ChangeText writeText={this.writeText}></ChangeText>
+              </View>
             </View>
+
+
+
           </ScrollView>
 
           <View style={styles.tabBarInfoContainer}>

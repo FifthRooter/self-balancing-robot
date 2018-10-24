@@ -7,15 +7,34 @@ io.on('connection', (socket) => {
       socket.emit('timer', new Date())
     }, interval)
   })
-  socket.on('toggleMotors', (interval) => {
-      setInterval(() => {
-        io.emit('toggleMotors', {time: 'this oclock'})
-        console.log('motors toggled')
-      }, interval)
+
+  socket.on('toggleMotors', () => {
+    console.log('motors toggled')
   })
-  setInterval(() => {
-    console.log('doing stuff inside io.on')
+
+  socket.on('updateKp', Kp => {
+    io.emit('updateKp', parseInt(Kp, 10))
+    console.log('Kp updated: ', Kp)
   })
+
+  socket.on('updateKd', Kd => {
+    io.emit('updateKd', parseInt(Kd, 10))
+    console.log('Kd updated: ', Kd)
+  })
+
+  socket.on('updateKi', Ki => {
+    io.emit('updateKi', parseInt(Ki, 10))
+    console.log('Ki updated: ', Ki)
+  })
+  // socket.on('toggleMotors', (interval) => {
+  //     setInterval(() => {
+  //       io.emit('toggleMotors', {time: 'this oclock'})
+  //       //console.log('motors toggled')
+  //     }, interval)
+  // })
+  // setInterval(() => {
+  //   //console.log('doing stuff inside io.on')
+  // })
 })
 
 

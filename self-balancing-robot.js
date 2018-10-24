@@ -140,6 +140,21 @@ io.on('connection', (socket) => {
   socket.on('toggleMotors', () => {
     motorsTurnedOff = !motorsTurnedOff
   })
+
+  socket.on('updateKp', val => {
+    console.log('Kp updated: ', val)
+    Kp = val
+  })
+
+  socket.on('updateKd', val => {
+    console.log('Kd updated: ', val)
+    Kd = val
+  })
+
+  socket.on('updateKi', val => {
+    console.log('Ki updated: ', val)
+    Ki = val
+  })
 })
 
 const port = 8000

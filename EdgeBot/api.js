@@ -5,7 +5,8 @@ const socket = openSocket('http://192.168.178.10:8000');
 function subscribeToTimer(cb) {
   socket.on('timer', timestamp => cb(null, timestamp));
   socket.emit('subscribeToTimer', 1000);
-  socket.emit('toggleMotors', 4000)
 }
 
-export { subscribeToTimer };
+
+
+export { subscribeToTimer, updateGainz };
