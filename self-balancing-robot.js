@@ -5,7 +5,13 @@ const nanotimer = require('nanotimer')
 const gpio = require('pigpio').Gpio
 const lcd = require('lcd')
 
-const io = require('socket.io')()
+//const io = require('socket.io')()
+
+const timer = new nanotimer()
+
+let address = 0x68
+let i2c1 = i2c.openSync(1)
+const sensor = new MPU6050(i2c1, address)
 
 // const openSocket = require('socket.io-client')
 // const socket = openSocket('http://192.168.178.10:8000')
@@ -90,8 +96,7 @@ let setMotors = (leftMotorSpeed, rightMotorSpeed) => {
 // }, 120)
 
 
-let startRobot = () => {
-  console.log('robot started')
+
   timer.setInterval(() => {
     let data = sensor.readSync()
     accY = data.accel.y
@@ -122,7 +127,7 @@ let startRobot = () => {
       console.log('Something went wrong with timer initialization :(')
     }
   })
-}
+
 
 
 
@@ -135,70 +140,10 @@ process.on('SIGINT', () => {
 });
 
 
-io.on('connection', (socket) => {
-  const timer = new nanotimer()
-
-  let address = 0x68
-  let i2c1 = i2c.openSync(1)
-  const sensor = new MPU6050(i2c1, address)
-
-  let accX, accY, gyroX, gyroRate, currTime, loopTime, prevTime=0, gyroAngle=0
-  let motorPower, currentAngle, prevAngle=0, error, prevError=0, errorSum=0
-
-  let motorsTurnedOff = false
-
-  let Kp=15, Kd=0.03, Ki=5
-
-  let sampleTime = 0.005
-  let targetAngle = 0
-
-  const direction_left = new gpio(16, {mode: gpio.OUTPUT})
-  const direction_right = new gpio(12, {mode: gpio.OUTPUT})
-
-  const motor_pwm_left = new gpio(20, {mode: gpio.OUTPUT})
-  const motor_pwm_right = new gpio(21, {mode: gpio.OUTPUT})
-
-
-  let motorState = (motorsAreOn) => {
-    motorsTurnedOff = motorsAreOn
-  }
-
-  let mapRange = (x, in_min, in_max, out_min, out_max) => {
-    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
-  }
-
-  let setMotors = (leftMotorSpeed, rightMotorSpeed) => {
-    if (motorsTurnedOff) {
-      if (leftMotorSpeed <= 0) {
-        leftMotorSpeed = leftMotorSpeed * (-1)
-        leftMotorSpeed = mapRange(leftMotorSpeed, 0, 255, 10, 255)
-        direction_left.digitalWrite(1)
-        motor_pwm_left.pwmWrite(parseInt(leftMotorSpeed, 10))
-      } else {
-        leftMotorSpeed = mapRange(leftMotorSpeed, 0, 255, 20, 255)
-        direction_left.digitalWrite(0)
-        motor_pwm_left.pwmWrite(parseInt(leftMotorSpeed, 10))
-      }
-
-      if (rightMotorSpeed <= 0) {
-        rightMotorSpeed = rightMotorSpeed * (-1)
-        rightMotorSpeed = mapRange(rightMotorSpeed, 0, 255, 0, 255)
-        direction_right.digitalWrite(0)
-        motor_pwm_right.pwmWrite(parseInt(rightMotorSpeed, 10))
-      } else {
-        rightMotorSpeed = mapRange(rightMotorSpeed, 0, 255, 0, 255)
-        direction_right.digitalWrite(1)
-        motor_pwm_right.pwmWrite(parseInt(rightMotorSpeed, 10))
-      }
-    } else {
-      motor_pwm_left.pwmWrite(0)
-      motor_pwm_right.pwmWrite(0)
-    }
-  }
-  startRobot()
-  console.log('connection created, robot started')
-})
-
-const port = 8000
-io.listen(port)
-console.log('listening on port 8000')
+// io.on('connection', (socket) => {
+//   console.log('connection created, robot started')
+// })
+//
+// const port = 8000
+// io.listen(port)
+// console.log('listening on port 8000')
