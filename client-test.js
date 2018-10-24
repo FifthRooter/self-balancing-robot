@@ -8,6 +8,10 @@ socket.on('disconnect', () => {
   console.log('Disconnected from the server')
 })
 
+setInterval(() => {
+  socket.emit('toggleMotors')
+}, 4000)
+
 socket.on('timer', (data) => {
 
 })

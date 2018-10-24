@@ -5,7 +5,7 @@ const nanotimer = require('nanotimer')
 const gpio = require('pigpio').Gpio
 const lcd = require('lcd')
 
-//const io = require('socket.io')()
+const io = require('socket.io')()
 
 const timer = new nanotimer()
 
@@ -13,8 +13,8 @@ let address = 0x68
 let i2c1 = i2c.openSync(1)
 const sensor = new MPU6050(i2c1, address)
 
-// const openSocket = require('socket.io-client')
-// const socket = openSocket('http://192.168.178.10:8000')
+const openSocket = require('socket.io-client')
+const socket = openSocket('http://192.168.178.10:8000')
 
 //const lcd = new Lcd({rs: 18, e: 23, data: [24, 25, 8, 7], cols: 16, rows: 2})
 
@@ -54,7 +54,7 @@ let mapRange = (x, in_min, in_max, out_min, out_max) => {
 }
 
 let setMotors = (leftMotorSpeed, rightMotorSpeed) => {
-  if (motorsTurnedOff) {
+  if (!motorsTurnedOff) {
     if (leftMotorSpeed <= 0) {
       leftMotorSpeed = leftMotorSpeed * (-1)
       leftMotorSpeed = mapRange(leftMotorSpeed, 0, 255, 10, 255)
@@ -140,10 +140,13 @@ process.on('SIGINT', () => {
 });
 
 
-// io.on('connection', (socket) => {
-//   console.log('connection created, robot started')
-// })
-//
-// const port = 8000
-// io.listen(port)
-// console.log('listening on port 8000')
+io.on('connection', (socket) => {
+  console.log('connection created, robot started')
+  socket.on('toggleMotors', () => {
+    motorsTurnedOff = !motorsTurnedOff
+  })
+})
+
+const port = 8000
+io.listen(port)
+console.log('listening on port 8000')
