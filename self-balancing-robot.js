@@ -22,11 +22,6 @@ const socket = openSocket('http://192.168.178.10:8000')
 //   console.log('motors toggled')
 // })
 
-const timer = new nanotimer()
-
-let address = 0x68
-let i2c1 = i2c.openSync(1)
-const sensor = new MPU6050(i2c1, address)
 
 let accX, accY, gyroX, gyroRate, currTime, loopTime, prevTime=0, gyroAngle=0
 let motorPower, currentAngle, prevAngle=0, error, prevError=0, errorSum=0
