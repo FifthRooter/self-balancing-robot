@@ -155,6 +155,15 @@ io.on('connection', (socket) => {
     console.log('Ki updated: ', val)
     Ki = val
   })
+
+  socket.on('moveForward', () => {
+    targetAngle = 18
+  })
+
+  socket.on('moveBackward', () => {
+    targetAngle = -18
+  })
+
 })
 
 const port = 8000
