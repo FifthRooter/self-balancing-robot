@@ -10,8 +10,6 @@ const io = require('socket.io')()
 const timer = new nanotimer()
 
 let address = 0x68
-let i2c1 = i2c.openSync(1)
-const sensor = new MPU6050(i2c1, address)
 
 const openSocket = require('socket.io-client')
 const socket = openSocket('http://192.168.178.10:8000')
@@ -23,7 +21,7 @@ const socket = openSocket('http://192.168.178.10:8000')
 // })
 
 
-let accX, accY, gyroX, gyroRate, currTime, loopTime, prevTime=0, gyroAngle=0
+let accX, accY, gyroX, accAngle, gyroRate, currTime, loopTime, prevTime=0, gyroAngle=0
 let motorPower, currentAngle, prevAngle=0, error, prevError=0, errorSum=0
 
 let motorsTurnedOff = false
@@ -93,13 +91,23 @@ let setMotors = (leftMotorSpeed, rightMotorSpeed) => {
 
 
   timer.setInterval(() => {
-    let data = sensor.readSync()
-    accY = data.accel.y
-    accZ = data.accel.z
-    gyroX = data.gyro.x
+    
+    let i2c1 = i2c.open(1, function(err) {
+	if (err) throw err;
 
-    accAngle = math.atan2(accY, accZ) * 180 / Math.PI
-    gyroRate = gyroX
+	let sensor = MPU6050(i2c1, address);
+
+	(function read() {
+		sensor.read(function (err, data) {
+			if (err) throw err;
+			accY = data.accel.y
+			accZ = data.accel.z
+			gyroX = data.gyro.x
+			accAngle = math.atan2(accY, accZ) * 180 / Math.PI
+			gyroRate = gyroX
+})
+}())
+})
     gyroAngle = gyroRate * sampleTime
 
     currentAngle = 0.99 * (prevAngle + gyroAngle) + 0.01 * accAngle

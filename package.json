@@ -17,6 +17,12 @@
   },
   "homepage": "https://github.com/FifthRooter/self-balancing-robot#readme",
   "dependencies": {
+    "i2c-bus": "^4.0.5",
+    "i2c-mpu6050": "^2.3.0",
+    "lcd": "^2.0.4",
+    "mathjs": "^5.2.2",
+    "nanotimer": "^0.3.15",
+    "pigpio": "^1.1.4",
     "socket.io": "^2.1.1",
     "socket.io-client": "^2.1.1"
   }
