@@ -26,6 +26,16 @@ io.on('connection', (socket) => {
     io.emit('updateKi', parseInt(Ki, 10))
     console.log('Ki updated: ', Ki)
   })
+
+  socket.on('moveForward', () => {
+    console.log('FORWARD')
+    io.emit('moveForward')
+  })
+
+  socket.on('moveBackward', () => {
+    console.log('BACKWARD')
+    io.emit('moveBackward')
+  })
   // socket.on('toggleMotors', (interval) => {
   //     setInterval(() => {
   //       io.emit('toggleMotors', {time: 'this oclock'})
