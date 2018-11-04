@@ -8,18 +8,46 @@ const io = require('socket.io')()
 
 let address = 0x68
 
+//
+// const Edgebot = mongoose.model('Edgebot', {
+//   gains: {
+//     Kp: Number,
+//     Ki: Number,
+//     Kd: Number,
+//   },
+//   log: {
+//     timestamp: String,
+//     accY: [],
+//     accZ: [],
+//     gyroX: [],
+//     currentAngle: [],
+//     elapsedTime: []
+//   }
+// })
+
 // let i2c1 = i2c.openSync(1)
 //
 // let sensor = new MPU6050(i2c1, address)
 
 const openSocket = require('socket.io-client')
-const socket = openSocket('http://192.168.178.10:8000')
+const socket = openSocket('http://192.168.43.89:8000')
 
 //const lcd = new Lcd({rs: 18, e: 23, data: [24, 25, 8, 7], cols: 16, rows: 2})
 
 // socket.on('toggleMotors', () => {
 //   console.log('motors toggled')
 // })
+let log_data_array = []
+
+// let log_data = {
+//   timestamp: '',
+//   accY: [],
+//   accZ: [],
+//   gyroX: [],
+//   currentAngle: [],
+//   elapsedTime: []
+// }
+
 
 
 let accX, accY, gyroX, accAngle, gyroRate, currTime, loopTime, prevTime=0, gyroAngle=0
@@ -27,10 +55,10 @@ let motorPower, currentAngle, prevAngle=0, error, prevError=0, errorSum=0
 
 let motorsTurnedOff = false
 
-let Kp=89, Kd=0.03, Ki=6
+let Kp=80, Kd=0, Ki=0
 
-let sampleTime = 0.005
-let targetAngle = 0
+let sampleTime = 0.025
+let targetAngle = 2
 
 const direction_left = new gpio(16, {mode: gpio.OUTPUT})
 const direction_right = new gpio(12, {mode: gpio.OUTPUT})
@@ -51,22 +79,22 @@ let setMotors = (leftMotorSpeed, rightMotorSpeed) => {
   if (!motorsTurnedOff) {
     if (leftMotorSpeed <= 0) {
       leftMotorSpeed = leftMotorSpeed * (-1)
-      leftMotorSpeed = mapRange(leftMotorSpeed, 0, 255, 10, 255)
+      leftMotorSpeed = mapRange(leftMotorSpeed, 0, 1200, 5, 255)
       direction_left.digitalWrite(1)
       motor_pwm_left.pwmWrite(leftMotorSpeed.toFixed())
     } else {
-      leftMotorSpeed = mapRange(leftMotorSpeed, 0, 255, 20, 255)
+      leftMotorSpeed = mapRange(leftMotorSpeed, 0, 1200, 9, 255)
       direction_left.digitalWrite(0)
       motor_pwm_left.pwmWrite(leftMotorSpeed.toFixed())
     }
 
     if (rightMotorSpeed <= 0) {
       rightMotorSpeed = rightMotorSpeed * (-1)
-      rightMotorSpeed = mapRange(rightMotorSpeed, 0, 255, 0, 255)
+      rightMotorSpeed = mapRange(rightMotorSpeed, 0, 1200, 0, 255)
       direction_right.digitalWrite(0)
       motor_pwm_right.pwmWrite(rightMotorSpeed.toFixed())
     } else {
-      rightMotorSpeed = mapRange(rightMotorSpeed, 0, 255, 0, 255)
+      rightMotorSpeed = mapRange(rightMotorSpeed, 0, 1200, 0, 255)
       direction_right.digitalWrite(1)
       motor_pwm_right.pwmWrite(rightMotorSpeed.toFixed())
     }
@@ -88,10 +116,7 @@ let setMotors = (leftMotorSpeed, rightMotorSpeed) => {
 //     })
 //   })
 // }, 120)
-
-
-
-  // setInterval(() => {
+// setInterval(() => {
   //   let data = sensor.readSync()
   //
 	// 	accY = data.accel.y
@@ -117,7 +142,8 @@ let setMotors = (leftMotorSpeed, rightMotorSpeed) => {
   //   prevAngle = currentAngle
   // }, 20)
 
-setInterval(() => {
+
+let interval = setInterval(() => {
   let i2c1 = i2c.open(1, function (err) {
     if (err) console.log(err);
 
@@ -140,8 +166,8 @@ setInterval(() => {
 
       motorPower = Kp*(error) + Ki*(errorSum)*sampleTime - Kd*(currentAngle-prevAngle)/sampleTime
       //motorPower = motorPower > 255 ? 255 : motorPower < -255 ? -255 : parseInt(motorPower, 10)
-      if (motorPower > 255) motorPower = 255
-      else if (motorPower < -255) motorPower = -255
+      if (motorPower > 1200) motorPower = 1200
+      else if (motorPower < -1200) motorPower = -1200
 
       setMotors(motorPower, motorPower)
 
@@ -181,11 +207,15 @@ io.on('connection', (socket) => {
   })
 
   socket.on('moveForward', () => {
-    targetAngle = 18
+    targetAngle = 3
   })
 
   socket.on('moveBackward', () => {
-    targetAngle = -18
+    targetAngle = -3
+  })
+
+  socket.on('disconnect', () => {
+    //clearInterval(interval)
   })
 
 })
