@@ -18,7 +18,7 @@ unsigned long currTime, prevTime = 0, loopTime; // Set time-related variables as
 #define motor_pwm_left 6                        // Set pin number for EN- pin of left motor (must be a PWM pin)
 #define motor_pwm_right 11                      // Set pin number for EN pin of right motor (must be a PWM pin)
 
-#define Kp 1000 // Set the proportional gain value for the PID controller
+#define Kp 100 // Set the proportional gain value for the PID controller
 #define Ki 0//0.0425//0.00016//0.001//0.001                                    //0.003 // Set the derivative gain value for the PID controller
 #define Kd 0//.010625
 #define sampleTime 0.02                        // Define sampling time
@@ -60,7 +60,7 @@ void initPID() {
   TCCR1A = 0;
   TCCR1B = 0;
 
-  OCR1A = 39999;
+  OCR1A = 9999; // match register = (16000000Hz / (8*desired_frequency)) - 1 ; currently the frequency is 200HZ(5ms)
   TCCR1B |= (1 << WGM12);
   TCCR1B |= (1 << CS11);
   TIMSK1 |= (1 << OCIE1A);
