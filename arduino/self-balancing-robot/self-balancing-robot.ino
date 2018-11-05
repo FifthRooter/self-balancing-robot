@@ -18,9 +18,9 @@ unsigned long currTime, prevTime = 0, loopTime; // Set time-related variables as
 #define motor_pwm_left 6                        // Set pin number for EN- pin of left motor (must be a PWM pin)
 #define motor_pwm_right 11                      // Set pin number for EN pin of right motor (must be a PWM pin)
 
-#define Kp 48 // Set the proportional gain value for the PID controller
-#define Ki 0//0.0425//0.00016//0.001//0.001                                    //0.003 // Set the derivative gain value for the PID controller
-#define Kd 0//.010625
+#define Kp 36 // Set the proportional gain value for the PID controller
+#define Ki 16.6667 //33.3333                                  //0.003 // Set the derivative gain value for the PID controller
+#define Kd 0.015//0.0075
 #define sampleTime 0.005                        // Define sampling time
 #define targetAngle 0.5                           // Define target angle which is the desired tilt of the robot
 
@@ -70,7 +70,7 @@ void initPID() {
   TCCR1A = 0;
   TCCR1B = 0;
 
-  OCR1A = 9999; // match register = (16000000Hz / (8*desired_frequency)) - 1 ; currently the frequency is 200HZ(5ms)
+  OCR1A = 19999; // match register = (16000000Hz / (8*desired_frequency)) - 1 ; currently the frequency is 200HZ(5ms)
   TCCR1B |= (1 << WGM12);
   TCCR1B |= (1 << CS11);
   TIMSK1 |= (1 << OCIE1A);
@@ -111,7 +111,7 @@ ISR(TIMER1_COMPA_vect) {
   gyroRate = map(gyroX, -32768, 32768, -250, 250);
   gyroAngle = (float)gyroRate * sampleTime;
   //currentAngle = 0.98 * (prevAngle + gyroAngle) + 0.02 * (accAngle);
-  currentAngle = complementaryFilter(accAngle, gyroRate, 5);
+  currentAngle = complementaryFilter(accAngle, gyroRate, sampleTime*1000);
   //Serial.print(accY);
   //Serial.print(",");
   //Serial.print(accZ);
@@ -120,11 +120,11 @@ ISR(TIMER1_COMPA_vect) {
   //Serial.print(",");
 
   error = currentAngle - targetAngle;
-  
+    errorSum = errorSum + error/2*sampleTime;
+
   // calculate output from PID values
   
-  motorPower = Kp * (error) + Ki * (errorSum + (error / 2 * sampleTime)) + Kd * (error - prevError) / sampleTime;
-  errorSum = errorSum + error / 2;
+  motorPower = Kp*(error + Ki * errorSum + Kd * (error - prevError) / sampleTime);
   prevError = error;
   Serial.println(currentAngle);
   //Serial.print(",");
