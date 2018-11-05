@@ -18,16 +18,26 @@ unsigned long currTime, prevTime = 0, loopTime; // Set time-related variables as
 #define motor_pwm_left 6                        // Set pin number for EN- pin of left motor (must be a PWM pin)
 #define motor_pwm_right 11                      // Set pin number for EN pin of right motor (must be a PWM pin)
 
-#define Kp 100 // Set the proportional gain value for the PID controller
+#define Kp 48 // Set the proportional gain value for the PID controller
 #define Ki 0//0.0425//0.00016//0.001//0.001                                    //0.003 // Set the derivative gain value for the PID controller
 #define Kd 0//.010625
-#define sampleTime 0.02                        // Define sampling time
-#define targetAngle 0                           // Define target angle which is the desired tilt of the robot
+#define sampleTime 0.005                        // Define sampling time
+#define targetAngle 0.5                           // Define target angle which is the desired tilt of the robot
+
+float a = 0.0;
+float tau = 0.075;
+float x_angle = 0.0;
 
 // Declare variables that are shared between the interrupt function and main loop as volatile to avoid compiler attempt to optimize the shared objects
 volatile int motorPower, gyroRate;
 volatile float currentAngle, prevAngle = 0, error, prevError = 0, errorSum = 0;
 
+float complementaryFilter(float newAngle, float gyroRate, int loopTime) {
+  float dtC = float(loopTime)/1000.0;
+  a = tau / (tau+dtC);
+  x_angle = a * (x_angle + gyroRate*dtC) + (1-a)*(newAngle);
+  return x_angle;
+}
 
 void setMotors(int leftMotorSpeed, int rightMotorSpeed) {
   if (leftMotorSpeed <= 0) {
@@ -36,7 +46,7 @@ void setMotors(int leftMotorSpeed, int rightMotorSpeed) {
     analogWrite(motor_pwm_left, leftMotorSpeed);
     digitalWrite(direction_left, HIGH);
   } else {
-    leftMotorSpeed = map(leftMotorSpeed, 0, 255, 20, 255); // CW
+    leftMotorSpeed = map(leftMotorSpeed, 0, 255, 22, 255); // CW
     analogWrite(motor_pwm_left, leftMotorSpeed);
     digitalWrite(direction_left, LOW);
   }
@@ -100,7 +110,8 @@ ISR(TIMER1_COMPA_vect) {
   accAngle = atan2(accY, accZ) * RAD_TO_DEG;
   gyroRate = map(gyroX, -32768, 32768, -250, 250);
   gyroAngle = (float)gyroRate * sampleTime;
-  currentAngle = 0.9934 * (prevAngle + gyroAngle) + 0.0066 * (accAngle);
+  //currentAngle = 0.98 * (prevAngle + gyroAngle) + 0.02 * (accAngle);
+  currentAngle = complementaryFilter(accAngle, gyroRate, 5);
   //Serial.print(accY);
   //Serial.print(",");
   //Serial.print(accZ);
@@ -109,12 +120,15 @@ ISR(TIMER1_COMPA_vect) {
   //Serial.print(",");
 
   error = currentAngle - targetAngle;
-  errorSum = errorSum + error;
+  
   // calculate output from PID values
-  motorPower = Kp * (error) + Ki * (errorSum) * sampleTime - Kd * (currentAngle - prevAngle) / sampleTime;
-  Serial.print(currentAngle);
-  Serial.print(",");
-  Serial.print(motorPower);
-  Serial.println("");
+  
+  motorPower = Kp * (error) + Ki * (errorSum + (error / 2 * sampleTime)) + Kd * (error - prevError) / sampleTime;
+  errorSum = errorSum + error / 2;
+  prevError = error;
+  Serial.println(currentAngle);
+  //Serial.print(",");
+  //Serial.print(motorPower);
+  //Serial.println("");
   prevAngle = currentAngle;
 }
