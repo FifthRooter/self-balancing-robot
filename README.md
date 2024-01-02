@@ -54,3 +54,10 @@ Libraries used:
 - Wire.h  - enables communication with I2C devices (small serial devices)
 - I2Cdev.h - enables interfacing/reading data from a I2C device
 - MPU6050.h - allows for reading data from the MPU-6050 board
+
+![mark-1-angle](https://github.com/FifthRooter/self-balancing-robot/assets/22204845/f6f01f2f-0999-420e-97f7-5de972a8af57)
+![mark-1-front](https://github.com/FifthRooter/self-balancing-robot/assets/22204845/103c5792-25d4-4d15-b150-73dc340c3b31)
+![mark-1-side](https://github.com/FifthRooter/self-balancing-robot/assets/22204845/2a8bf8a8-1e68-4261-98d1-7efba381481b)
+![mark-1-top](https://github.com/FifthRooter/self-balancing-robot/assets/22204845/97ea6658-e6c4-4eca-ba50-b5df885f6f23)
+![mark-bottom](https://github.com/FifthRooter/self-balancing-robot/assets/22204845/711813bd-c435-42a1-9309-e33b931dba93)
+
